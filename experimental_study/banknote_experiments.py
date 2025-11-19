@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedKFold
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
@@ -26,6 +26,13 @@ def load_banknote_data(test_size=0.3, random_state=42):
     X = df[COLUMN_NAMES[:-1]]
     y = df["class"]
     return train_test_split(X, y, test_size=test_size, random_state=random_state, stratify=y)
+
+
+def load_full_dataset():
+    df = pd.read_csv(DATA_URL, header=None, names=COLUMN_NAMES)
+    X = df[COLUMN_NAMES[:-1]]
+    y = df["class"]
+    return X, y
 
 
 def compute_classification_metrics(y_true, y_pred):
@@ -119,6 +126,17 @@ def plot_metric_bars(name, metrics):
     return output_path
 
 
+def run_cross_validation(model, model_name, cv_folds=10):
+    X, y = load_full_dataset()
+    kfold = StratifiedKFold(n_splits=cv_folds, shuffle=True, random_state=42)
+    scores = cross_val_score(model, X, y, cv=kfold, scoring="accuracy")
+    return {
+        "model": model_name,
+        "scores": scores,
+        "average": scores.mean(),
+    }
+
+
 def print_metrics(name, metrics):
     print(f"=== {name} sonuçları ===")
     print(f"Confusion Matrix: {metrics['confusion_matrix']}")
@@ -148,3 +166,12 @@ if __name__ == "__main__":
     print(f"SVM Metrics: {svm_metrics_path}")
     print(f"Random Forest Confusion Matrix: {rf_conf_path}")
     print(f"Random Forest Metrics: {rf_metrics_path}")
+
+    svm_cv_results = run_cross_validation(SVC(kernel="rbf", C=1.0, gamma="scale"), "SVM")
+    rf_cv_results = run_cross_validation(RandomForestClassifier(n_estimators=100, random_state=42), "Random Forest")
+
+    print("=== 10-Fold Cross Validation Sonuçları ===")
+    print(f"SVM skorları: {svm_cv_results['scores']}")
+    print(f"SVM ortalama doğruluk: {svm_cv_results['average']:.4f}")
+    print(f"Random Forest skorları: {rf_cv_results['scores']}")
+    print(f"Random Forest ortalama doğruluk: {rf_cv_results['average']:.4f}")

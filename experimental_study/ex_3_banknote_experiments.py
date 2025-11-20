@@ -146,6 +146,12 @@ def print_metrics(name, metrics):
     print("-" * 40)
 
 
+def print_cv_results(results):
+    scores_formatted = ", ".join(f"{score:.4f}" for score in results["scores"])
+    print(f"{results['model']} 10-Fold Doğruluk Skorları: [{scores_formatted}]")
+    print(f"{results['model']} Ortalama Doğruluk: {results['average']:.4f}\n")
+
+
 if __name__ == "__main__":
     svm_experiment = SVMExperiment()
     rf_experiment = RandomForestExperiment()
@@ -171,7 +177,5 @@ if __name__ == "__main__":
     rf_cv_results = run_cross_validation(RandomForestClassifier(n_estimators=100, random_state=42), "Random Forest")
 
     print("=== 10-Fold Cross Validation Sonuçları ===")
-    print(f"SVM skorları: {svm_cv_results['scores']}")
-    print(f"SVM ortalama doğruluk: {svm_cv_results['average']:.4f}")
-    print(f"Random Forest skorları: {rf_cv_results['scores']}")
-    print(f"Random Forest ortalama doğruluk: {rf_cv_results['average']:.4f}")
+    print_cv_results(svm_cv_results)
+    print_cv_results(rf_cv_results)

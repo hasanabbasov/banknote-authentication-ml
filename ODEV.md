@@ -1,115 +1,167 @@
-Kümeleme ve Regresyon Bölümleri İçin Plan ve Prompt
+Derin Öğrenme ile Görüntü Tanıma / Sınıflandırma – Proje Planı
 
-Bu bölümde kümeleme ve regresyon adımlarını, projede nasıl uygulayacağımı ve kod yapısını nasıl organize edeceğimi açıklıyorum. Bu plan aynı zamanda yeni oluşturacağım Python dosyalarındaki sınıfların yapısını belirlemektedir.
+Bu bölümde ödev kapsamında geliştireceğim derin öğrenme tabanlı görüntü sınıflandırma uygulamasının tüm planı, veri seti yapısı, kullanılacak modeller ve değerlendirme ölçütleri açıklanmaktadır.
 
-1) Veri Kaynağı ve Kullanım Planı
+1) Veri Seti: Sınıflar ve Görseller
 
-Bu ödevde kümeleme ve regresyon için oteller ile ilgili gerçek veri kullanılacaktır. Elimde iki temel veri kümesi bulunmaktadır:
+Ödev gereği en az 3 sınıf ve her sınıfta en az 10 farklı görüntü kullanılmalıdır.
 
-Hotel Profile Data
+Bu proje için aşağıdaki sınıflar seçilmiştir:
 
-Otelin konumu, şehir, yıldız sayısı, oda sayısı gibi temel özellikler içeriyor.
+📌 Sınıflar
 
-Ayrıca otelin bulunduğu bölge, zincir bilgisi gibi kategorik alanlar da mevcut.
+Kalem – 10 farklı kalem fotoğrafı
 
-Bu veri kümesi kümeleme için uygundur çünkü sayısal ve kategorik karışık çok özellik var ve doğal gruplar oluşturabilir.
+Defter – 10 farklı defter fotoğrafı
 
-Hotel Email Campaign / Lead Scores
+Mouse – 10 farklı mouse fotoğrafı
 
-Otellere gönderilen e-posta kampanyalarının aldığı skorlar, toplam kampanya sayısı, minimum–maksimum skor gibi performans ölçümleri içeriyor.
+📸 Görüntülerin Özellikleri
 
-Bu veri kümesi regresyon için uygundur çünkü kampanya sonuçları sayısal olup bir değerin tahmini yapılabilir (örneğin bir otelin gelecekteki kampanya skorunu tahmin etmek).
+Tümü gerçek nesnelerin kendim tarafından farklı açılardan çekilmiş fotoğrafları olacaktır.
 
-Veriler aynı hotelId alanı üzerinden birleştirilebilir. Ancak ödev gereği, hem kümeleme hem regresyon işlemleri için verileri ayrı olarak kullanmak daha açık ve anlaşılır olacaktır.
+Her sınıf için 10 farklı fiziksel ürün kullanılacaktır.
 
-2) Proje Yapısı ve Class Düzeni
+Görseller farklı açılardan (üst, yan, çapraz) çekilecektir.
 
-Bu bölümde iki sınıf oluşturulacaktır. Kod içinde yorum kullanmayacağım; açıklamalar sadece class dokümantasyonu üzerinde olacak.
+Farklı ışık koşullarından faydalanılacaktır.
 
-(A) Kümeleme – Clustering Class
+Tüm resimler modele verilmeden önce 224×224 boyutuna dönüştürülecektir.
 
-Dosya adı: ex_4_clustering.py
-Sınıf adı: Ex4Clustering
+Bu yapı, hem küçük veri üzerinde derin öğrenme testleri için uygundur hem de sınıflar görsel olarak birbirinden kolayca ayrılabildiği için model başarısı açık şekilde gözlemlenebilir.
 
-Class açıklamasında şunlar yer alacak:
+2) Veri Bölünmesi: Eğitim ve Test
 
-Bu sınıfın otel profil verisini kullanarak kümeleme yaptığı,
+Toplanan 30 görüntü aşağıdaki gibi ikiye ayrılacaktır:
 
-Seçilecek 2 algoritmanın (ör: K-Means, Agglomerative Clustering) neden tercih edildiği,
+Eğitim seti (%80) → Model öğrenme sürecinde kullanılır
 
-Verinin nasıl işlendiği (normalizasyon, kategorik encoding),
+Test seti (%20) → Modelin performansını ölçmek için tutulur
 
-Sonuçların nasıl üretildiği (inertia, silhouette score),
+Küçük dataset nedeniyle eğitim verisinin çeşitliliğini artırmak için Data Augmentation (veri artırma) uygulanacaktır.
 
-KISS ve functional yapıya uyulduğu.
+3) Kullanılacak 2 Derin Öğrenme Modeli
 
-Kod:
+Ödev gereği iki farklı derin öğrenme modeli ile sınıflandırma yapılacaktır.
 
-Veri yükleme fonksiyonu
+Model 1: CNN (Convolutional Neural Network) – Sıfırdan Oluşturulmuş
 
-Preprocessing fonksiyonu
+Bu model tamamen sıfırdan aşağıdaki yapıda tasarlanacaktır:
 
-K-Means modeli
+Conv2D + ReLU
 
-Agglomerative Clustering modeli
+MaxPooling
 
-Sonuç skorlarının döndürülmesi
-şeklinde sade fonksiyonlardan oluşacak.
+Dropout
 
-(B) Regresyon – Regression Class
+Flatten
 
-Dosya adı: ex_4_regression.py
-Sınıf adı: Ex4Regression
+Dense (Softmax çıkış katmanı)
 
-Class açıklamasında şunlar yer alacak:
+Bu model küçük datasetlerde temel bir karşılaştırma noktası sağlar.
 
-Kampanya skor verisinin regresyon için kullanıldığı,
+Model 2: Transfer Learning – MobileNetV2 veya EfficientNetB0
 
-Kullanılacak 2 algoritmanın (ör: Linear Regression & Random Forest Regressor) tanımı,
+Bu model daha gelişmiş olup:
 
-Verideki hedef değişkenin (score veya averageScore) açık tanımı,
+Önceden büyük veri üzerinde eğitilmiş
 
-Eğitim/test ayrımı, MSE ve R² gibi metriklerle değerlendirme yapıldığı.
+Özellik çıkarımı güçlü
 
-Kod:
+Küçük veri üzerinde yüksek doğruluk sağlayan
 
-Veri yükleme fonksiyonu
+bir mimaridir.
 
-Preprocessing
+Kullanılacak yapı:
 
-Linear Regression modeli
+Pretrained base model (MobileNetV2)
 
-Random Forest modeli
+Base model dondurulacak (fine-tuning yapılmayabilir)
 
-Metriklerin hesaplanması
-şeklinde sade fonksiyonlardan oluşacak.
+Üzerine:
 
-3) Kodlama Prensiplerim
+GlobalAveragePooling
 
-Bu bölümde yazacağım tüm sınıflar için ortak kurallar:
+Dense katmanlar
 
-Kod içinde yorum (#) kullanılmayacak.
+Softmax çıkış katmanı
 
-Açıklamalar sadece class açıklamalarında olacak.
+Bu yaklaşım küçük veri setlerinde özellikle yüksek performans sağlar.
 
-Try/except, gereksiz if blokları, loglama kullanılmayacak.
+4) Eğitim Süreci
 
-Kod tamamen sade ve fonksiyonel olacak.
+Her iki model için ortak adımlar:
 
-Sınıflar birbirinden bağımsız modüller olacak.
+✔ Veri Yükleme
 
-İstenirse ileride notebook veya CLI üzerinden çağrılabilir.
+Keras ImageDataGenerator ile klasör bazlı otomatik yükleme.
 
-4) Ödeve Uygunluk
+✔ Veri Artırma (Augmentation)
 
-Bu plan aşağıdaki ödev maddelerinin birebir karşılığıdır:
+Rotation (10–20 derece)
 
-“Kümeleme veri seti bulunuz” → Hotel Profile Data kullanılacak
+Width/height shift
 
-“2 yöntem işletiniz ve başarı değerlerini karşılaştırınız” → K-Means + Agglomerative
+Zoom
 
-“Regresyon veri seti bulunuz” → Hotel Campaign Scores kullanılacak
+Horizontal flip
 
-“2 yöntemle regresyon yapınız” → Linear Regression + Random Forest
+✔ Eğitim Parametreleri
 
-“Başarı ölçütleri yazınız” → MSE, MAE veya R²
+Batch size: 16
+
+Epoch: 10–20 (final seçim eğitimdeki duruma göre)
+
+Loss: Categorical Crossentropy
+
+Optimizer: Adam
+
+✔ Kaydedilecek Çıktılar
+
+Eğitim ve doğrulama loss/accuracy grafikleri
+
+Confusion matrix
+
+Her iki modelin başarı karşılaştırması
+
+5) Değerlendirme ve Sonuçların Raporlanması
+
+Her iki model için aşağıdaki metrikler karşılaştırılacaktır:
+
+Accuracy (en önemli metrik)
+
+Loss
+
+Precision / Recall / F1-score (istenirse)
+
+Confusion Matrix
+
+Rapor kısmında yer alacak:
+
+Eğitime ait grafikler
+
+3 sınıftan örnek görseller
+
+Her modelin test doğruluk oranı
+
+Hangi modelin neden daha başarılı olduğuna dair kısa yorum
+
+Genellikle MobileNetV2 gibi transfer learning modelleri:
+
+küçük datasetlerde çok daha iyi sonuç verir
+
+hızlı öğrenir
+
+daha az parametre ile daha kararlı performans sağlar
+
+Bu nedenle sonuç kısmında bu durum açıkça raporlanacaktır.
+
+✔ Ödev Gereksinimlerine Uyum
+Ödev Maddesi	Karşılığı
+En az 3 sınıf	Kalem – Defter – Mouse
+Her sınıfta 10 görüntü	10 gerçek farklı ürün fotoğrafı
+Görüntü toplama	Telefon kamerası ile çekilmiş
+Eğitim / Test ayrımı	%80 - %20
+İki model kullanma	CNN + Transfer Learning
+Performans karşılaştırma	Accuracy, confusion matrix, grafikler
+Raporlama	Görseller + eğitim sonuçları + yorum
